@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Five-in-a-Row: P1 vs P2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+html, body {
+  margin:0; padding:0; height:100%; width:100%;
+  font-family:sans-serif;
+  background:#eee; color:#333;
+  display:flex; flex-direction:column;
+}
+body.dark { background:#222; color:#ddd; }
+nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 20px; background:#444; color:white;
+  flex-wrap: wrap;
+}
+.player-display {
+  display:flex; align-items:center;
+}
+.player-display img.avatar {
+  width:32px; height:32px; border-radius:50%;
+  margin-right:8px;
+}
+#board-container {
+  flex:1; width:100%; position:relative;
+  display:flex; align-items:center; justify-content:center;
+  overflow:auto;
+}
+#board {
+  box-shadow:0 0 8px rgba(0,0,0,0.3);
+  background:#f0f0f0;
+  display:block;
+}
+body.dark #board { background:#333; }
+#status {
+  text-align:center; margin:8px 0; font-weight:bold;
+  font-size:1.2rem;
+}
+.modal {
+  position:absolute;
+  top:10px; right:10px;
+  background:white; padding:16px 24px;
+  border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.5);
+  font-size:18px; display:none; z-index:50;
+}
+.modal button.close-btn {
+  position:absolute; top:4px; right:8px; border:none; background:red;
+  color:white; font-weight:bold; border-radius:50%; width:24px; height:24px;
+  cursor:pointer;
+}
+.timer {
+  font-weight:bold; font-size:1.2rem; margin-left:10px;
+}
+nav div.controls {
+  display:flex; align-items:center; flex-wrap: wrap;
+  gap:8px;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="player-display" id="p1-display">Player 1</div>
+  <div class="controls">
+    <input type="text" id="p1-name" placeholder="Player 1 Name">
+    <select id="p1-avatar">
+      <option value="https://i.pravatar.cc/48?img=12">Male</option>
+      <option value="https://i.pravatar.cc/48?img=32">Female</option>
+    </select>
+    <input type="text" id="p2-name" placeholder="Player 2 Name">
+    <select id="p2-avatar">
+      <option value="https://i.pravatar.cc/48?img=47">Male</option>
+      <option value="https://i.pravatar.cc/48?img=28">Female</option>
+    </select>
+    <button id="start-btn">Start Game</button>
+    <button id="dark-toggle">Toggle Dark Mode</button>
+    <span class="timer" id="timer">40</span>
+  </div>
+  <div class="player-display" id="p2-display">Player 2</div>
+</nav>
+
+<div id="status">Welcome! Enter names and avatars to start.</div>
+<div id="board-container">
+  <canvas id="board" tabindex="0"></canvas>
+  <div class="modal" id="time-modal">
+    <button class="close-btn" id="modal-close">X</button>
+    <span id="modal-msg">Time's up! Draw.</span>
+  </div>
+</div>
+
+<!-- Audio -->
+<audio id="clap-sound" src="https://actions.google.com/sounds/v1/human_voices/applause.ogg"></audio>
+<audio id="zonk-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="ding-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<audio id="dong-sound" src="https://actions.google.com/sounds/v1/cartoon/metal_thud.ogg"></audio>
+
+<script>
+const canvas = document.getElementById("board");
+const ctx = canvas.getContext("2d");
+const statusEl = document.getElementById("status");
+const timerEl = document.getElementById("timer");
+const p1Display = document.getElementById("p1-display");
+const p2Display = document.getElementById("p2-display");
+const startBtn = document.getElementById("start-btn");
+const darkToggle = document.getElementById("dark-toggle");
+const modal = document.getElementById("time-modal");
+const modalMsg = document.getElementById("modal-msg");
+const modalClose = document.getElementById("modal-close");
+
+const p1NameInput = document.getElementById("p1-name");
+const p2NameInput = document.getElementById("p2-name");
+const p1AvatarSelect = document.getElementById("p1-avatar");
+const p2AvatarSelect = document.getElementById("p2-avatar");
+
+const clapSound = document.getElementById("clap-sound");
+const zonkSound = document.getElementById("zonk-sound");
+const dingSound = document.getElementById("ding-sound");
+const dongSound = document.getElementById("dong-sound");
+
+// Preload sounds
+window.addEventListener("click",()=>{
+  [clapSound, zonkSound, dingSound, dongSound].forEach(a=>{a.play().then(()=>a.pause()).catch(()=>{});});
+},{once:true});
+
+let CELL=40, cols=20, rows=20;
+let board=[], current="X", gameOver=false;
+let winLine=[], rowOffset=0, colOffset=0;
+let countdown=40, timerInterval=null;
+let nextStarter="X", flashInterval=null;
+
+function initBoard(){
+  board = Array(rows).fill(null).map(()=>Array(cols).fill(null));
+  rowOffset=0; colOffset=0;
+  winLine=[];
+}
+
+function resizeCanvas(){
+  cols = Math.max(cols, Math.floor(window.innerWidth/CELL));
+  rows = Math.max(rows, Math.floor(window.innerHeight/CELL));
+  canvas.width = cols*CELL;
+  canvas.height = rows*CELL;
+  drawBoard();
+}
+
+window.addEventListener("resize", resizeCanvas);
+
+function drawBoard(){
+  ctx.fillStyle = document.body.classList.contains("dark") ? "#333" : "#f0f0f0";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle="#aaa";
+  for(let x=0;x<=cols;x++){ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,canvas.height);ctx.stroke();}
+  for(let y=0;y<=rows;y++){ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(canvas.width,y*CELL);ctx.stroke();}
+  board.forEach((row,y)=>row.forEach((p,x)=>{
+    if(p) drawPiece(x,y,p, winLine.some(pt=>pt.x===x && pt.y===y));
+  }));
+}
+
+function drawPiece(x,y,p,hl){
+  const cx=(x+colOffset)*CELL+CELL/2;
+  const cy=(y+rowOffset)*CELL+CELL/2;
+  if(p==="X"){
+    ctx.strokeStyle="blue";
+    ctx.beginPath();
+    ctx.moveTo(cx-CELL*0.3,cy-CELL*0.3);
+    ctx.lineTo(cx+CELL*0.3,cy+CELL*0.3);
+    ctx.moveTo(cx+CELL*0.3,cy-CELL*0.3);
+    ctx.lineTo(cx-CELL*0.3,cy+CELL*0.3);
+    ctx.stroke();
+  }else{
+    ctx.fillStyle="red";
+    ctx.beginPath();
+    ctx.arc(cx,cy,CELL*0.3,0,2*Math.PI);
+    ctx.fill();
+  }
+}
+
+function checkWin(x,y,p){
+  const dirs=[[1,0],[0,1],[1,1],[1,-1]];
+  for(const [dx,dy] of dirs){
+    let count=1,line=[{x,y}];
+    for(let s=1;s<5;s++){let nx=x+dx*s,ny=y+dy*s;if(!board[ny]||board[ny][nx]!==p)break;line.push({x:nx,y:ny});count++;}
+    for(let s=1;s<5;s++){let nx=x-dx*s,ny=y-dy*s;if(!board[ny]||board[ny][nx]!==p)break;line.unshift({x:nx,y:ny});count++;}
+    if(count>=5){winLine=line; return true;}
+  }
+  return false;
+}
+
+function expandIfNeeded(x,y){
+  let expanded=false;
+  if(y>=rows-5){board.push(...Array(10).fill(null).map(()=>Array(cols).fill(null)));rows+=10;expanded=true;}
+  if(x>=cols-5){board.forEach(r=>r.push(...Array(10).fill(null)));cols+=10;expanded=true;}
+  if(y<5){board.unshift(...Array(10).fill(null).map(()=>Array(cols).fill(null)));rows+=10;rowOffset+=10;expanded=true;}
+  if(x<5){board.forEach(r=>r.unshift(...Array(10).fill(null)));cols+=10;colOffset+=10;expanded=true;}
+  if(expanded){resizeCanvas();drawBoard();}
+}
+
+function playPieceSound(p){ if(p==="X"){dongSound.currentTime=0;dongSound.play().catch(()=>{});} else{dingSound.currentTime=0;dingSound.play().catch(()=>{});} }
+
+function placePiece(canvasX,canvasY){
+  const x=canvasX-colOffset;
+  const y=canvasY-rowOffset;
+  if(x<0||y<0||x>=cols||y>=rows||board[y][x]||gameOver)return false;
+  board[y][x]=current;
+  drawBoard();
+  expandIfNeeded(x+colOffset,y+rowOffset);
+  playPieceSound(current);
+  if(checkWin(x,y,current)){endGame(current+" Wins!",true,false);return true;}
+  current=current==="X"?"O":"X";
+  statusEl.textContent=`${current}'s Turn`;
+  resetTimer();
+  return true;
+}
+
+function resetTimer(){
+  clearInterval(timerInterval);
+  countdown=40; timerEl.textContent=countdown; timerEl.style.color="green";
+  timerInterval=setInterval(()=>{
+    countdown--;
+    timerEl.textContent=countdown;
+    if(countdown<=0){
+      clearInterval(timerInterval);
+      timerEl.style.color="red";
+      showTimeUpModal();
+      zonkSound.currentTime=0; zonkSound.play().catch(()=>{});
+      gameOver=true;
+    }
+  },1000);
+}
+
+function showTimeUpModal(){
+  modal.style.display="block";
+}
+
+modalClose.onclick=()=>{ modal.style.display="none"; };
+
+function flashLine(){
+  let visible=true;
+  flashInterval=setInterval(()=>{
+    drawBoard();
+    if(visible){
+      ctx.strokeStyle="orange"; ctx.lineWidth=6;
+      ctx.beginPath();
+      ctx.moveTo((winLine[0].x+colOffset)*CELL+CELL/2,(winLine[0].y+rowOffset)*CELL+CELL/2);
+      ctx.lineTo((winLine[winLine.length-1].x+colOffset)*CELL+CELL/2,(winLine[winLine.length-1].y+rowOffset)*CELL+CELL/2);
+      ctx.stroke();
+    }
+    visible=!visible;
+  },500);
+}
+
+function endGame(msg, win=false, timeup=false){
+  gameOver = true;
+  clearInterval(timerInterval); // ← Stop the countdown timer
+  statusEl.textContent = msg;
+
+  if(win){
+    clapSound.currentTime = 0;
+    clapSound.play().catch(()=>{});
+    flashLine();
+    setTimeout(()=>{
+      clapSound.pause();
+      clearInterval(flashInterval);
+      drawBoard();
+    }, 5000);
+  }
+
+  if(timeup){
+    showTimeUpModal();
+  }
+}
+
+canvas.addEventListener("click",e=>{
+  if(gameOver)return;
+  const rect=canvas.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/CELL);
+  const y=Math.floor((e.clientY-rect.top)/CELL);
+  placePiece(x,y);
+});
+
+canvas.addEventListener("touchstart",e=>{
+  e.preventDefault(); if(gameOver)return;
+  const touch=e.touches[0];
+  const rect=canvas.getBoundingClientRect();
+  const x=Math.floor((touch.clientX-rect.left)/CELL);
+  const y=Math.floor((touch.clientY-rect.top)/CELL);
+  placePiece(x,y);
+});
+
+darkToggle.onclick=()=>{document.body.classList.toggle("dark"); drawBoard();};
+
+startBtn.onclick=()=>{
+  const p1Name = p1NameInput.value.trim() || "Player 1";
+  const p2Name = p2NameInput.value.trim() || "Player 2";
+  const p1Avatar = p1AvatarSelect.value;
+  const p2Avatar = p2AvatarSelect.value;
+  p1Display.innerHTML=`<img class="avatar" src="${p1Avatar}"> ${p1Name} (X)`;
+  p2Display.innerHTML=`<img class="avatar" src="${p2Avatar}"> ${p2Name} (O)`;
+  initBoard(); resizeCanvas(); drawBoard();
+  gameOver=false;
+  current = nextStarter;
+  nextStarter = nextStarter==="X"?"O":"X";
+  statusEl.textContent=`${current}'s Turn`;
+  modal.style.display="none";
+  resetTimer();
+};
+
+initBoard(); resizeCanvas(); drawBoard();
+</script>
+</body>
+</html>
