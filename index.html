@@ -246,14 +246,51 @@ function checkWin(x,y,p){
   return false;
 }
 
-function expandIfNeeded(x,y){
-  let expanded=false;
-  if(y>=rows-5){board.push(...Array(10).fill(null).map(()=>Array(cols).fill(null)));rows+=10;expanded=true;}
-  if(x>=cols-5){board.forEach(r=>r.push(...Array(10).fill(null)));cols+=10;expanded=true;}
-  if(y<5){board.unshift(...Array(10).fill(null).map(()=>Array(cols).fill(null)));rows+=10;rowOffset+=10;expanded=true;}
-  if(x<5){board.forEach(r=>r.unshift(...Array(10).fill(null)));cols+=10;colOffset+=10;expanded=true;}
-  if(expanded){resizeCanvas();drawBoard();}
+function expandIfNeeded(x, y){
+    let expanded = false;
+    const container = document.getElementById("board-container");
+
+    // Add rows/columns at bottom/right
+    if(y >= rows - 5){
+        board.push(...Array(10).fill(null).map(() => Array(cols).fill(null)));
+        rows += 10;
+        expanded = true;
+    }
+    if(x >= cols - 5){
+        board.forEach(r => r.push(...Array(10).fill(null)));
+        cols += 10;
+        expanded = true;
+    }
+
+    // Add rows/columns at top/left
+    if(y < 5){
+        board.unshift(...Array(10).fill(null).map(() => Array(cols).fill(null)));
+        rows += 10;
+        rowOffset += 10;
+        expanded = true;
+    }
+    if(x < 5){
+        board.forEach(r => r.unshift(...Array(10).fill(null)));
+        cols += 10;
+        colOffset += 10;
+        expanded = true;
+    }
+
+    if(expanded){
+        resizeCanvas();
+        drawBoard();
+
+        // Auto-scroll to keep the current view in center
+        container.scrollTop = (y + rowOffset) * CELL - container.clientHeight / 2;
+        container.scrollLeft = (x + colOffset) * CELL - container.clientWidth / 2;
+
+        // Optional: clamp to 0 minimum
+        container.scrollTop = Math.max(container.scrollTop, 0);
+        container.scrollLeft = Math.max(container.scrollLeft, 0);
+    }
 }
+
+
 
 function playPieceSound(p){ if(p==="X"){dongSound.currentTime=0;dongSound.play().catch(()=>{});} else{dingSound.currentTime=0;dingSound.play().catch(()=>{});} }
 
@@ -369,6 +406,7 @@ initBoard(); resizeCanvas(); drawBoard();
 </script>
 </body>
 </html>
+
 
 
 
