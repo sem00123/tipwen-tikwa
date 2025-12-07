@@ -62,68 +62,37 @@ nav div.controls {
 </head>
 <body>
 
-<!-- Donation buttons snippet -->
-<div class="donation-buttons-floating">
-  <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" class="donation-btn coffee">
-    ☕ Buy Me a Coffee
-  </a>
-  <a href="https://stridewallet.com/YOUR_STRIDE_ADDRESS" target="_blank" class="donation-btn stride">
-    💰 Donate via Stride
-  </a>
-</div>
 
-<style>
-/* Floating donation buttons - fixed to top nav bar */
-.donation-buttons-floating {
-  position: absolute;
-  top: 10px; /* distance from top of page */
-  right: 20px; /* distance from right edge */
-  display: flex;
-  gap: 12px;
-  z-index: 1000; /* make sure it floats above other elements */
-}
-
-<!-- Buy Me a Coffee Button -->
-<div class="bmc-button-floating">
-  <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" class="donation-btn coffee">
+<!-- Buy Me a Coffee Floating Button -->
+<div id="bmc-floating-btn">
+  <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" id="bmc-btn">
     ☕ Buy Me a Coffee
   </a>
 </div>
 
 <style>
 /* Floating button - top right */
-.bmc-button-floating {
-  position: absolute; /* or fixed to stay on scroll */
+#bmc-floating-btn {
+  position: fixed; /* stays visible on scroll */
   top: 10px;
   right: 20px;
   z-index: 1000;
 }
 
-/* Neon button style */
-.donation-btn {
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-weight: bold;
+/* Button styling */
+#bmc-btn {
+  padding: 6px 12px;
+  background-color: #28a745; /* green */
+  color: white;
+  border-radius: 4px;
   text-decoration: none;
-  font-size: 0.95rem;
-  text-shadow: 0 0 5px #fff, 0 0 10px #fff;
-  transition: all 0.2s ease-in-out;
-  color: #fff;
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff;
-  background: #ff4d00;
-  box-shadow: 0 0 10px #ff4d00, 0 0 20px #ff4d00;
-}
-.donation-btn.coffee:hover {
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
-  box-shadow: 0 0 15px #ff4d00, 0 0 30px #ff4d00;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: background 0.2s ease-in-out;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .donation-btn {
-    font-size: 0.85rem;
-    padding: 4px 10px;
-  }
+#bmc-btn:hover {
+  background-color: #218838; /* darker green on hover */
 }
 </style>
 
@@ -378,4 +347,5 @@ initBoard(); resizeCanvas(); drawBoard();
 </script>
 </body>
 </html>
+
 
