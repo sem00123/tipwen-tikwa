@@ -62,40 +62,47 @@ nav div.controls {
 </head>
 <body>
 
-
-<!-- Buy Me a Coffee Floating Button -->
-<div id="bmc-floating-btn">
-  <a href="https://www.buymeacoffee.com/morris1" target="_blank" id="bmc-btn">
-    ☕ Buy Me a Coffee
-  </a>
-</div>
-
+<!-- Buy Me a Coffee Button for Nav -->
 <style>
-/* Floating button - top right */
-#bmc-floating-btn {
-  position: fixed; /* stays visible on scroll */
-  top: 10px;
-  right: 20px;
-  z-index: 1000;
-}
-
 /* Button styling */
 #bmc-btn {
+  display: inline-block;
   padding: 6px 12px;
   background-color: #28a745; /* green */
   color: white;
-  border-radius: 4px;
-  text-decoration: none;
   font-weight: bold;
+  text-decoration: none;
+  border-radius: 6px;
+  font-family: sans-serif;
+  transition: background 0.3s;
+  margin-left: 10px;
   font-size: 0.9rem;
-  transition: background 0.2s ease-in-out;
+}
+#bmc-btn:hover {
+  background-color: #1e7e34;
 }
 
-#bmc-btn:hover {
-  background-color: #218838; /* darker green on hover */
+/* Flex adjustment to align nicely in nav */
+nav .player-display {
+  display: flex;
+  align-items: center;
 }
 </style>
 
+<a id="bmc-btn" href="https://www.buymeacoffee.com/morris1" target="_blank">
+  ☕ Support Five-in-a-Row
+</a>
+
+<script>
+// Move the button next to Player 1 display
+window.addEventListener('DOMContentLoaded', () => {
+  const p1Display = document.getElementById('p1-display');
+  const bmcBtn = document.getElementById('bmc-btn');
+  if (p1Display && bmcBtn) {
+    p1Display.parentNode.insertBefore(bmcBtn, p1Display.nextSibling);
+  }
+});
+</script>
 
   
 <nav>
@@ -347,6 +354,7 @@ initBoard(); resizeCanvas(); drawBoard();
 </script>
 </body>
 </html>
+
 
 
 
