@@ -62,6 +62,73 @@ nav div.controls {
 </head>
 <body>
 
+<!-- Donation buttons snippet -->
+<div class="donation-buttons-floating">
+  <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" class="donation-btn coffee">
+    ☕ Buy Me a Coffee
+  </a>
+  <a href="https://stridewallet.com/YOUR_STRIDE_ADDRESS" target="_blank" class="donation-btn stride">
+    💰 Donate via Stride
+  </a>
+</div>
+
+<style>
+/* Floating donation buttons - fixed to top nav bar */
+.donation-buttons-floating {
+  position: absolute;
+  top: 10px; /* distance from top of page */
+  right: 20px; /* distance from right edge */
+  display: flex;
+  gap: 12px;
+  z-index: 1000; /* make sure it floats above other elements */
+}
+
+<!-- Buy Me a Coffee Button -->
+<div class="bmc-button-floating">
+  <a href="https://www.buymeacoffee.com/YOUR_USERNAME" target="_blank" class="donation-btn coffee">
+    ☕ Buy Me a Coffee
+  </a>
+</div>
+
+<style>
+/* Floating button - top right */
+.bmc-button-floating {
+  position: absolute; /* or fixed to stay on scroll */
+  top: 10px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* Neon button style */
+.donation-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 0.95rem;
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+  transition: all 0.2s ease-in-out;
+  color: #fff;
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff;
+  background: #ff4d00;
+  box-shadow: 0 0 10px #ff4d00, 0 0 20px #ff4d00;
+}
+.donation-btn.coffee:hover {
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
+  box-shadow: 0 0 15px #ff4d00, 0 0 30px #ff4d00;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .donation-btn {
+    font-size: 0.85rem;
+    padding: 4px 10px;
+  }
+}
+</style>
+
+
+  
 <nav>
   <div class="player-display" id="p1-display">Player 1</div>
   <div class="controls">
@@ -311,3 +378,4 @@ initBoard(); resizeCanvas(); drawBoard();
 </script>
 </body>
 </html>
+
