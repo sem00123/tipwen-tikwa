@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Five-in-a-Row: P1 vs P2</title>
+<title>Five-in-a-Row: Tipwen-Tikwa P1 vs P2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 html, body {
@@ -61,8 +61,7 @@ nav div.controls {
 </style>
 </head>
 <body>
-
-<!-- Buy Me a Coffee Button for Nav -->
+  
 <style>
 /* Button styling */
 #bmc-btn {
@@ -81,8 +80,7 @@ nav div.controls {
 #bmc-btn:hover {
   background-color: #1e7e34;
 }
-
-/* Flex adjustment to align nicely in nav */
+  
 nav .player-display {
   display: flex;
   align-items: center;
@@ -90,11 +88,10 @@ nav .player-display {
 </style>
 
 <a id="bmc-btn" href="https://www.buymeacoffee.com/morris1" target="_blank">
-  ☕ Support Five-in-a-Row
+  ☕ Support Five-in-a-row (Tipwen-Tikwa)
 </a>
 
 <script>
-// Move the button next to Player 1 display
 window.addEventListener('DOMContentLoaded', () => {
   const p1Display = document.getElementById('p1-display');
   const bmcBtn = document.getElementById('bmc-btn');
@@ -130,7 +127,7 @@ window.addEventListener('DOMContentLoaded', () => {
   <canvas id="board" tabindex="0"></canvas>
   <div class="modal" id="time-modal">
     <button class="close-btn" id="modal-close">X</button>
-    <span id="modal-msg">Time's up! Draw.</span>
+    <span id="modal-msg">Time's up! Better Luck Next Time.</span>
   </div>
 </div>
 
@@ -354,6 +351,7 @@ initBoard(); resizeCanvas(); drawBoard();
 </script>
 </body>
 </html>
+
 
 
 
