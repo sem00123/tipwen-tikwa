@@ -570,8 +570,54 @@ resizeCanvas();
 drawBoard();
 </script>
 
+<script>
+// ============================
+// Visitor Counter Script
+// ============================
+
+// Wrap in DOMContentLoaded to ensure nav elements exist
+window.addEventListener('DOMContentLoaded', () => {
+  const bmcBtn = document.getElementById('bmc-btn');
+
+  if (!bmcBtn) return;
+
+  // Create counter element
+  const counter = document.createElement('span');
+  counter.id = 'visitor-counter';
+  counter.style.marginLeft = '8px';
+  counter.style.fontWeight = 'bold';
+  counter.style.color = 'white';
+  counter.textContent = '...'; // placeholder while loading
+
+  // Insert counter next to the support button
+  bmcBtn.parentNode.insertBefore(counter, bmcBtn.nextSibling);
+
+  // Use a free visitor counter API (https://api.countapi.xyz)
+  // We'll use your GitHub repo as a namespace
+  const namespace = 'tipwen-tikwa-game';
+  const key = 'visitor-counter';
+
+  // Increment visitor count
+  fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.value !== undefined) {
+        counter.textContent = `👁 ${data.value}`;
+      } else {
+        counter.textContent = '👁 N/A';
+      }
+    })
+    .catch(err => {
+      console.error('Visitor counter error:', err);
+      counter.textContent = '👁 N/A';
+    });
+});
+</script>
+
+  
 </body>
 </html>
+
 
 
 
